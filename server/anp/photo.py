@@ -2,8 +2,9 @@
 import math
 import enum
 import superdesk
+import requests
 
-from flask import json, request
+from flask import json, request, current_app as app
 from datetime import datetime
 from xmlrpc.client import ServerProxy
 from superdesk.utils import ListCursor
@@ -157,6 +158,11 @@ class PhotoSearchProvider(superdesk.SearchProvider):
         update_renditions(item, location['url'], None)
 
         return item
+
+    def fetch_file(self, href, rendition, item, **kwargs):
+        if rendition.get('media'):
+            return app.media.get(rendition['media'])
+        return requests.get(href, timeout=(5, 25))
 
 
 def init_app(app):
